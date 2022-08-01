@@ -1,64 +1,76 @@
 #!/usr/bin/env node
-const dedent=require('dedent')
 
-const yargs=require('yargs/yargs')
-const process=require("process")
-
-// const {hideBin}=require("yargs/helpers")
-// const arg =hideBin(process.argv)
+const {Command} =require('commander')
 
 const pkg=require('../package.json')
-const context={arkVersion:pkg.version}
 
-const cli=yargs()
-const argv=process.argv.slice(2)
+const program=new Command()
 
-cli
-.usage("Usage: arkmorn-test <command> [options]")
-.demandCommand(1, "A command is required. Pass --help to see all available commands and options.")
-.recommendCommands()
-.alias("v","version")
-.alias("h","help")
-.wrap(cli.terminalWidth())
-.fail((err,msg)=>{
-    console.log(err)
-})
-.epilogue(dedent` When a command fails, all logs are written to lerna-debug.log in the current working directory.
+// 主命令
+program
+    .name(Object.keys(pkg.bin)[0])
+    .usage(`<command> [options]`)
+    .version(pkg.version)
+    .option('-d,--debug','是否开启debug模式',false)
+    .option('-e,--envName <envName>','获取环境变量')
+    
 
-For more information, find our manual at https://github.com/lerna/lerna`)
-.options({
-    debug:{
-        type:"boolean",
-        desc:"Bootstrap debug mode",
-        alias:"d"
-    }
-})
-.option('registry',{
-    type:"string",
-    desc:"rrr",
-    alias:"r",
-})
-.group(['debug'],'Dev Options:')
-.group(['registry'],'Registry Options:')
-.command('init [name]','init a project',(yargs)=>{
-    yargs.options({
-        name:{
-            type:'string',
-            desc:"name of init",
-            alias:"n"
-        }
+// 注册命令
+const clone=program.command('clone <source> [destination]')
+clone
+    // .arguments('<source> [destination]')
+    .description('clone a repository')
+    .option('-f,--force','是否强制克隆')
+    .action((source,destination,cmdObj)=>{
+        console.log('do clone',source,destination,cmdObj.force)
     })
-},(argv)=>{
-    console.log(argv)
+
+// 注册子命令
+const service=new Command().command('service')
+service
+    .command('start [port]')
+    // .arguments('[port]')
+    .action((port)=>{
+        console.log('start service',port);
+    })
+service
+    .command('stop [port]')
+    .action((port)=>{
+        console.log('stop service',port);
+    })
+// install
+program
+    .command('install [name]','install package',{
+        executableFile:'arkmorn-cli-dev',
+        // isDefault:true,
+        // hidden:true
+    })
+    .alias('i')
+    .action((name)=>{
+    })
+
+// cmd必须输入
+// program
+//     .arguments('<cmd> [options]')
+//     .description('test command',{
+//         cmd:"command to run",
+//         options:"options to command"
+//     })
+//     .action((cmd,options)=>{
+//         console.log(cmd,options)
+//     })
+
+// 自定义帮助信息
+program.helpInformation=function(){
+    return 'help information'
+}
+// 监听option
+program.on('--help',()=>{
 })
-.command({
-    command:"list",
-    aliases:['ls','ll','la'],
-    describe:"List local packages",
-    builder:(yargs)=>{},
-    handler:(argv)=>{
-        console.log('argv',argv)
-    }
+program.on('options:debug',()=>{
+    program.opts().debug
 })
-.strict()
-.parse(argv,context)
+// 监听command
+
+program.addCommand(service)
+program.parse(process.argv)
