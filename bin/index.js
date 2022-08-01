@@ -38,15 +38,16 @@ service
     .action((port)=>{
         console.log('stop service',port);
     })
-// install
+// command description
 program
     .command('install [name]','install package',{
-        executableFile:'arkmorn-cli-dev'
+        executableFile:'arkmorn-cli-dev',
+        // isDefault:true,
     })
     .alias('i')
-    .action((name)=>{
-        console.log('install');
-    })
+    // .action((name)=>{
+    //     console.log('install');
+    // })
 
 // cmd必须输入
 // program
@@ -66,10 +67,19 @@ program
 // 监听option
 // program.on('--help',()=>{
 // })
-program.on('options:debug',()=>{
-    program.opts().debug
+program.on('option:debug',()=>{
+    if(program.opts().debug){
+        process.env.LOG_LEVEL='verbose'
+    }
+    console.log(process.env.LOG_LEVEL)
 })
-// 监听command
+// 监听未知command
+program.on('command:*',(obj)=>{
+    console.log(obj);
+    console.error('未知命令:'+obj[0])
+    const avaliableCommand=program.commands.map(command=>command.name()).join(',')
+    console.log('可用命令:'+avaliableCommand)
+})
 
 program.addCommand(service)
 program.parse(process.argv)
