@@ -41,12 +41,11 @@ service
 // install
 program
     .command('install [name]','install package',{
-        executableFile:'arkmorn-cli-dev',
-        // isDefault:true,
-        // hidden:true
+        executableFile:'arkmorn-cli-dev'
     })
     .alias('i')
     .action((name)=>{
+        console.log('install');
     })
 
 // cmd必须输入
@@ -61,12 +60,12 @@ program
 //     })
 
 // 自定义帮助信息
-program.helpInformation=function(){
-    return 'help information'
-}
+// program.helpInformation=function(){
+//     return 'help information'
+// }
 // 监听option
-program.on('--help',()=>{
-})
+// program.on('--help',()=>{
+// })
 program.on('options:debug',()=>{
     program.opts().debug
 })
