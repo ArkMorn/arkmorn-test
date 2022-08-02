@@ -1,6 +1,6 @@
 
 import path from 'path'
-import {pathExistsSyncFnc} from './utils'
+import {pathExistsSyncFnc} from './utils.mjs'
 
 
 console.log(path.resolve('.'))
